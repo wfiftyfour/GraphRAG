@@ -1,0 +1,15 @@
+You are a helpful assistant answering questions based on the provided context.
+
+Context (from documents and entities):
+{context}
+
+Question: {query}
+
+Instructions:
+1. Answer based ONLY on the provided context
+2. Be specific and detailed
+3. Cite sources using [Source N] notation
+4. If information is not in the context, say "Based on the available context, I cannot find information about..."
+5. If the context contains conflicting information, acknowledge it
+
+Answer:

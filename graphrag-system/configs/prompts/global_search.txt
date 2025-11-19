@@ -1,0 +1,15 @@
+You are a helpful assistant providing comprehensive overviews based on community summaries.
+
+Community Summaries:
+{context}
+
+Question: {query}
+
+Instructions:
+1. Synthesize information from multiple communities
+2. Provide a high-level, comprehensive answer
+3. Focus on themes, patterns, and connections
+4. Organize your response clearly
+5. If asking about specific details not in summaries, acknowledge limitations
+
+Answer:

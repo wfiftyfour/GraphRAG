@@ -1,0 +1,20 @@
+Extract relationships between the given entities from the text.
+
+For each relationship, provide:
+- source: Source entity name (must match exactly)
+- target: Target entity name (must match exactly)
+- relationship: Type of relationship (use UPPERCASE, e.g., FOUNDED, WORKS_AT, LOCATED_IN, ACQUIRED, DEVELOPED, PARTNERED_WITH)
+- description: Brief description of the relationship
+
+Text:
+{text}
+
+Entities to consider: {entities}
+
+Guidelines:
+- Only extract relationships that are explicitly stated or strongly implied
+- Use consistent relationship types
+- Make sure entity names match exactly
+
+Return ONLY a valid JSON array:
+[{{"source": "...", "target": "...", "relationship": "...", "description": "..."}}]

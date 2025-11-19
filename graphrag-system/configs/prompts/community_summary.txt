@@ -1,0 +1,17 @@
+Create a comprehensive summary for this community of related entities.
+
+Entities in this community:
+{entities}
+
+Key relationships between them:
+{relationships}
+
+Write a summary that:
+1. Identifies the main theme or domain of this community
+2. Describes the most important entities and their significance
+3. Explains key relationships and how entities connect
+4. Highlights any notable patterns or insights
+
+The summary should be 2-3 paragraphs and help someone quickly understand what this community represents.
+
+Summary:

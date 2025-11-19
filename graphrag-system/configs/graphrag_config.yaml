@@ -1,0 +1,52 @@
+# GraphRAG Main Configuration
+
+# Data paths
+data:
+  input_file: "data/input/graphrag_input.jsonl"
+  output_dir: "data/output"
+  processed_dir: "data/processed"
+
+# Chunking configuration
+chunking:
+  chunk_size: 1200
+  chunk_overlap: 100
+
+# LLM configuration (Ollama)
+llm:
+  provider: "ollama"
+  model: "llama3.1:8b"
+  base_url: "http://localhost:11434"
+  temperature: 0.0  # For extraction tasks
+  max_tokens: 2048
+
+# Embedding configuration
+embedding:
+  model: "BAAI/bge-large-en-v1.5"
+  dimension: 1024
+  batch_size: 32
+
+# Graph configuration
+graph:
+  output_dir: "data/output/graph"
+
+# Community detection
+community:
+  algorithm: "leiden"
+  resolution: 1.0
+  output_dir: "data/output/communities"
+
+# Search configuration
+search:
+  local:
+    top_k: 10
+    use_graph_context: true
+  global:
+    top_k: 5
+  hybrid:
+    local_weight: 0.5
+    global_weight: 0.5
+
+# Generation configuration
+generation:
+  temperature: 0.3
+  max_tokens: 1024

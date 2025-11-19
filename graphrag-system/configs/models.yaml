@@ -1,0 +1,36 @@
+# Model Configurations
+
+# Embedding models
+embedding:
+  # Best for English
+  default: "BAAI/bge-large-en-v1.5"
+  alternatives:
+    - name: "BAAI/bge-base-en-v1.5"
+      dimension: 768
+      note: "Faster, slightly lower quality"
+    - name: "sentence-transformers/all-mpnet-base-v2"
+      dimension: 768
+      note: "Good general purpose"
+
+# LLM models for Ollama
+llm:
+  # Best for English RAG
+  default: "llama3.1:8b"
+  alternatives:
+    - name: "llama3.1:70b"
+      note: "Best quality, needs 48GB+ RAM"
+    - name: "mistral:7b"
+      note: "Good for coding tasks"
+    - name: "phi3:14b"
+      note: "Good balance"
+    - name: "gemma2:9b"
+      note: "Fast, good quality"
+
+# Reranker models
+reranker:
+  default: "BAAI/bge-reranker-large"
+  alternatives:
+    - name: "BAAI/bge-reranker-base"
+      note: "Faster"
+    - name: "cross-encoder/ms-marco-MiniLM-L-12-v2"
+      note: "Lighter weight"

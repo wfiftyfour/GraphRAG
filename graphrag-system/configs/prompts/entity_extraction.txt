@@ -1,0 +1,18 @@
+Extract all named entities from the following text.
+
+For each entity, identify:
+- name: The exact name as it appears in text
+- type: One of [PERSON, ORGANIZATION, LOCATION, EVENT, CONCEPT, PRODUCT, DATE, TECHNOLOGY]
+- description: A brief description based on context (1-2 sentences)
+
+Guidelines:
+- Extract ALL meaningful entities, not just the most prominent ones
+- For people, include their roles or titles if mentioned
+- For organizations, include what they do
+- For locations, include relevant context (headquarters, event location, etc.)
+
+Text:
+{text}
+
+Return ONLY a valid JSON array with no additional text:
+[{{"name": "...", "type": "...", "description": "..."}}]
