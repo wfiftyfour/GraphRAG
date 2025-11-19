@@ -1,0 +1,17 @@
+# Index Configuration
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 50
+
+local_index:
+  path: "data/indexes/local"
+  type: "faiss"  # faiss, annoy, hnsw
+
+global_index:
+  path: "data/indexes/global"
+  type: "faiss"
+
+preprocessing:
+  lowercase: false
+  remove_special_chars: false

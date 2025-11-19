@@ -1,0 +1,24 @@
+# Search Configuration
+
+default:
+  search_type: "hybrid"  # local, global, hybrid
+  top_k: 10
+  use_reranker: true
+
+hybrid:
+  local_weight: 0.5
+  global_weight: 0.5
+
+routing:
+  enabled: true
+  local_keywords:
+    - "specific"
+    - "detail"
+    - "example"
+    - "how to"
+  global_keywords:
+    - "overview"
+    - "summary"
+    - "general"
+    - "what is"
+    - "explain"

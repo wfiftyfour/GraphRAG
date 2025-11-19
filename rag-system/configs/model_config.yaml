@@ -1,0 +1,29 @@
+# Model Configuration - Optimized for English
+
+embedding:
+  # Best embedding model for English (top performance on MTEB benchmark)
+  model_name: "BAAI/bge-large-en-v1.5"
+  dimension: 1024
+  batch_size: 32
+
+reranker:
+  # Best reranker for English
+  model_name: "BAAI/bge-reranker-large"
+  top_k: 10
+
+generator:
+  # Using Ollama with best local model for English
+  provider: "ollama"  # openai, ollama
+  model_name: "llama3.1:8b"  # Best for English reasoning & RAG
+  max_tokens: 1024
+  temperature: 0.3  # Lower for more factual responses
+
+  # Alternative models (uncomment to use):
+  # model_name: "mistral:7b"      # Good for coding tasks
+  # model_name: "llama3.1:70b"    # Best quality (needs 48GB+ RAM)
+  # model_name: "phi3:14b"        # Good balance quality/speed
+
+# OpenAI fallback (if you have API key)
+openai:
+  model_name: "gpt-4o-mini"  # Best cost/performance ratio
+  # model_name: "gpt-4o"     # Best quality

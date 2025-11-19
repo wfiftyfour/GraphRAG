@@ -1,0 +1,2 @@
+{"id": "doc_001", "text": "Sample document text for GraphRAG system.", "metadata": {"source": "example", "date": "2024-01-01"}}
+{"id": "doc_002", "text": "Another example document for testing purposes.", "metadata": {"source": "example", "date": "2024-01-02"}}
