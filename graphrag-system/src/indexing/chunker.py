@@ -13,7 +13,15 @@ class TextChunker:
 
     def chunk_document(self, document: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Split a document into chunks."""
+        # Handle both 'text' field and 'conversation' field
         text = document.get('text', '')
+
+        # If no text field, try to extract from conversation
+        if not text and 'conversation' in document:
+            conversation = document['conversation']
+            if isinstance(conversation, list):
+                text = ' '.join([msg.get('content', '') for msg in conversation if isinstance(msg, dict)])
+
         doc_id = document.get('id', '')
         metadata = document.get('metadata', {})
 

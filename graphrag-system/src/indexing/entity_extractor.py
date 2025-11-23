@@ -2,16 +2,22 @@
 
 import json
 import requests
+import time
 from typing import List, Dict, Any
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class EntityExtractor:
     """Extract named entities from text chunks using LLM."""
 
-    def __init__(self, llm_client=None):
+    def __init__(self, llm_client=None, provider="ollama"):
         self.llm_client = llm_client
+        self.provider = provider
+
+        # Ollama config - lightweight model for RTX 3050 8GB
         self.ollama_url = "http://localhost:11434/api/chat"
-        self.model = "llama3.1:8b"
+        self.ollama_model = "qwen2.5:3b"  # 3B model - fast, low VRAM (~4GB)
 
     def extract(self, chunk: Dict[str, Any], prompt_template: str = None) -> List[Dict[str, Any]]:
         """Extract entities from a single chunk."""
@@ -29,13 +35,26 @@ class EntityExtractor:
 
         return entities
 
-    def extract_batch(self, chunks: List[Dict[str, Any]], prompt_template: str = None) -> List[Dict[str, Any]]:
-        """Extract entities from multiple chunks."""
+    def extract_batch(self, chunks: List[Dict[str, Any]], prompt_template: str = None,
+                       max_workers: int = 1) -> List[Dict[str, Any]]:
+        """Extract entities from multiple chunks with parallel processing."""
         all_entities = []
 
-        for chunk in chunks:
-            entities = self.extract(chunk, prompt_template)
-            all_entities.extend(entities)
+        def process_chunk(chunk):
+            return self.extract(chunk, prompt_template)
+
+        # Use ThreadPoolExecutor for parallel LLM calls
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_chunk = {executor.submit(process_chunk, chunk): chunk for chunk in chunks}
+
+            # Process results with progress bar
+            for future in tqdm(as_completed(future_to_chunk), total=len(chunks), desc="Extracting entities"):
+                try:
+                    entities = future.result(timeout=300)  # 5 minute timeout per chunk
+                    all_entities.extend(entities)
+                except Exception as e:
+                    print(f"Error processing chunk: {e}")
 
         # Deduplicate entities by name
         unique_entities = self._deduplicate_entities(all_entities)
@@ -43,18 +62,50 @@ class EntityExtractor:
         return unique_entities
 
     def _call_llm(self, prompt: str) -> str:
+        """Call LLM (Gemini or Ollama)."""
+        if self.provider == "gemini":
+            return self._call_gemini(prompt)
+        else:
+            return self._call_ollama(prompt)
+
+    def _call_gemini(self, prompt: str) -> str:
+        """Call Gemini API."""
+        url = f"{self.gemini_url}/{self.gemini_model}:generateContent?key={self.gemini_api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0}
+        }
+
+        try:
+            response = requests.post(url, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            time.sleep(2)  # 30 RPM limit
+            return result['candidates'][0]['content']['parts'][0]['text']
+        except Exception as e:
+            print(f"Gemini call failed: {e}")
+            if "429" in str(e):
+                time.sleep(60)
+                return self._call_gemini(prompt)
+            return "[]"
+
+    def _call_ollama(self, prompt: str) -> str:
         """Call Ollama LLM."""
         payload = {
-            "model": self.model,
+            "model": self.ollama_model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
             "options": {"temperature": 0}
         }
 
         try:
-            response = requests.post(self.ollama_url, json=payload)
+            response = requests.post(self.ollama_url, json=payload, timeout=120)
             response.raise_for_status()
+            time.sleep(0.5)  # Small delay between requests to prevent overload
             return response.json()['message']['content']
+        except requests.exceptions.Timeout:
+            print(f"Ollama timeout after 120s, skipping this chunk...")
+            return "[]"  # Skip instead of retry to avoid infinite loop
         except Exception as e:
             print(f"LLM call failed: {e}")
             return "[]"
@@ -72,12 +123,22 @@ class EntityExtractor:
                 parsed = json.loads(json_str)
 
                 for entity in parsed:
-                    entities.append({
-                        'name': entity.get('name', ''),
-                        'type': entity.get('type', 'UNKNOWN'),
-                        'description': entity.get('description', ''),
-                        'source_chunk': chunk_id
-                    })
+                    # Handle both dict and string formats
+                    if isinstance(entity, dict):
+                        entities.append({
+                            'name': entity.get('name', ''),
+                            'type': entity.get('type', 'UNKNOWN'),
+                            'description': entity.get('description', ''),
+                            'source_chunk': chunk_id
+                        })
+                    elif isinstance(entity, str):
+                        # If entity is a string, create a simple entity
+                        entities.append({
+                            'name': entity,
+                            'type': 'UNKNOWN',
+                            'description': '',
+                            'source_chunk': chunk_id
+                        })
         except json.JSONDecodeError:
             # Fallback: simple extraction
             pass
@@ -88,7 +149,16 @@ class EntityExtractor:
         """Deduplicate entities by name."""
         seen = {}
         for entity in entities:
-            name = entity['name'].lower()
+            # Skip entities with empty or None names
+            if not entity.get('name'):
+                continue
+
+            name = entity['name'].lower().strip()
+
+            # Skip empty names after stripping
+            if not name:
+                continue
+
             if name not in seen:
                 seen[name] = entity
             else:

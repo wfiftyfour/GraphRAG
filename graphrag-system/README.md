@@ -1,14 +1,15 @@
 # GraphRAG System
 
-A Knowledge Graph based Retrieval Augmented Generation system with local and global search capabilities.
+Hệ thống **Retrieval Augmented Generation (RAG)** dựa trên **Knowledge Graph**, hỗ trợ tìm kiếm và trả lời câu hỏi thông minh với đánh giá chất lượng tự động.
 
-## Features
+## ✨ Tính năng chính
 
-- **Knowledge Graph Construction**: Extract entities and relationships from documents using LLM
-- **Community Detection**: Leiden algorithm for discovering clusters of related entities
-- **Local Search**: Vector similarity search over documents and entities
-- **Global Search**: Search over community summaries for high-level answers
-- **REST API**: FastAPI endpoints for integration
+- 🔍 **Local Search**: Tìm kiếm chi tiết dựa trên entities và relationships
+- 🌍 **Global Search**: Tìm kiếm tổng quan dựa trên community summaries
+- 📊 **4 Evaluation Metrics**: Đánh giá chất lượng tự động (Relevance, Coverage, Answer Quality, Faithfulness)
+- 🖥️ **Web GUI**: Giao diện web thân thiện với Gradio
+- 🚀 **RESTful API**: FastAPI để tích hợp vào các hệ thống khác
+- 📈 **Batch Evaluation**: Đánh giá hàng loạt queries
 
 ## Project Structure
 

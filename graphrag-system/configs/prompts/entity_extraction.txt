@@ -1,15 +1,50 @@
-Extract all named entities from the following text.
+Extract ALL significant entities from the following health, lifestyle, and demographic information.
 
 For each entity, identify:
-- name: The exact name as it appears in text
-- type: One of [PERSON, ORGANIZATION, LOCATION, EVENT, CONCEPT, PRODUCT, DATE, TECHNOLOGY]
-- description: A brief description based on context (1-2 sentences)
+- name: The exact name/term as it appears in text
+- type: Choose the MOST specific type from the list below
+- description: Brief contextual description (1-2 sentences)
 
-Guidelines:
-- Extract ALL meaningful entities, not just the most prominent ones
-- For people, include their roles or titles if mentioned
-- For organizations, include what they do
-- For locations, include relevant context (headquarters, event location, etc.)
+ENTITY TYPES:
+
+**Health & Biology:**
+- NUTRIENT: vitamins, minerals, macros (iron, calcium, protein, folate, calories)
+- HORMONE: testosterone, estrogen, progesterone
+- BIOMARKER: measurable indicators (hemoglobin, bone density, testosterone levels)
+- BODY_PART: organs, tissues, systems (prostate, bones, muscle mass, cardiovascular)
+- HEALTH_CONDITION: diseases, conditions (anemia, osteoporosis, gynecomastia)
+- SYMPTOM: physical/mental symptoms (fatigue, mood dips, urinary changes)
+- MEDICAL_SCREENING: tests and procedures (mammogram, prostate screening, bone density scan)
+
+**Measurements & Ranges:**
+- MEASUREMENT: specific quantities (8 mg, 400 mcg, 300-1000 ng/dL, 2500-3000 calories)
+- AGE_RANGE: age specifications (age 50, midlife, post-puberty, past midlife)
+
+**Demographics & Lifestyle:**
+- DEMOGRAPHIC_GROUP: population groups (adult males, men, athletes, younger folks)
+- ACTIVITY_LEVEL: physical activity (intense training, regular workouts, lifting heavy)
+- DIETARY_HABIT: eating patterns (alcohol use, red meat diet, balanced nutrition)
+- LIFESTYLE_FACTOR: behaviors affecting health (smoking, stress, gym routine, blood donation)
+
+**Risk & Health Factors:**
+- RISK_FACTOR: factors increasing/decreasing risk (family history, genetic risk, chronic steroid use)
+- HEALTH_GOAL: desired outcomes (maintain muscle, preserve lean mass, bone strength)
+
+**Social & Professional:**
+- CAREER_FIELD: occupation types or industries mentioned
+- SOCIAL_CONCEPT: societal topics (stereotypes, workplace dynamics, gender expectations)
+- LIFE_EXPERIENCE: personal/social milestones
+
+**General:**
+- HEALTH_GUIDELINE: recommendations or standards mentioned
+- CONCEPT: abstract ideas not fitting other categories
+
+GUIDELINES:
+- Extract EVERY meaningful entity - be comprehensive
+- Use specific types over general ones (HORMONE > BIOMARKER > CONCEPT)
+- Include both technical terms and colloquial descriptions
+- Capture numeric ranges and thresholds as MEASUREMENT entities
+- Extract implicit entities (e.g., "lower libido" → SYMPTOM)
 
 Text:
 {text}

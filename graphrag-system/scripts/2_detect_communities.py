@@ -35,8 +35,11 @@ def main():
         logger.info(f"Detected {len(communities)} communities")
 
         # Print community stats
-        sizes = [len(members) for members in communities.values()]
-        logger.info(f"Community sizes: min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.1f}")
+        if communities:
+            sizes = [len(members) for members in communities.values()]
+            logger.info(f"Community sizes: min={min(sizes)}, max={max(sizes)}, avg={sum(sizes)/len(sizes):.1f}")
+        else:
+            logger.warning("No communities detected!")
 
         # Save communities
         detector.save()

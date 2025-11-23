@@ -9,7 +9,7 @@ class QueryProcessor:
     """Process queries and determine search strategy."""
 
     def __init__(self):
-        self.embedder = TextEmbedder()
+        self.embedder = None  # Lazy load on first use
         self.local_keywords = [
             'who', 'what is', 'where', 'when', 'specific', 'detail',
             'example', 'how does', 'define', 'describe'
@@ -22,6 +22,10 @@ class QueryProcessor:
 
     def process(self, query: str) -> Dict[str, Any]:
         """Process a query and return embedding and metadata."""
+        # Lazy load embedder on first use
+        if self.embedder is None:
+            self.embedder = TextEmbedder()
+
         # Generate embedding
         embedding = self.embedder.embed_query(query)
 

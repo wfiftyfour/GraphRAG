@@ -2,19 +2,24 @@
 
 import json
 import requests
+import time
 from typing import List, Dict, Any
 from pathlib import Path
 import pandas as pd
+from tqdm import tqdm
 
 
 class CommunitySummarizer:
     """Generate summaries for communities."""
 
-    def __init__(self, output_dir: str = "data/output/reports"):
+    def __init__(self, output_dir: str = "data/output/reports", provider: str = "ollama"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.provider = provider
+
+        # Ollama config - lightweight model for RTX 3050 8GB
         self.ollama_url = "http://localhost:11434/api/chat"
-        self.model = "llama3.1:8b"
+        self.ollama_model = "qwen2.5:3b"  # 3B model - fast, low VRAM (~4GB)
 
     def summarize_community(self, community_id: int, members: List[str],
                            graph, prompt_template: str = None) -> Dict[str, Any]:
@@ -58,8 +63,7 @@ class CommunitySummarizer:
         """Generate summaries for all communities."""
         reports = []
 
-        for community_id, members in communities.items():
-            print(f"Summarizing community {community_id} ({len(members)} entities)...")
+        for community_id, members in tqdm(communities.items(), desc="Summarizing communities"):
             report = self.summarize_community(
                 community_id, members, graph, prompt_template
             )
@@ -91,9 +95,37 @@ class CommunitySummarizer:
         return df.to_dict('records')
 
     def _call_llm(self, prompt: str) -> str:
+        """Call LLM (Gemini or Ollama)."""
+        if self.provider == "gemini":
+            return self._call_gemini(prompt)
+        else:
+            return self._call_ollama(prompt)
+
+    def _call_gemini(self, prompt: str) -> str:
+        """Call Gemini API."""
+        url = f"{self.gemini_url}/{self.gemini_model}:generateContent?key={self.gemini_api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.3}
+        }
+
+        try:
+            response = requests.post(url, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            time.sleep(2)  # 30 RPM limit
+            return result['candidates'][0]['content']['parts'][0]['text']
+        except Exception as e:
+            print(f"Gemini call failed: {e}")
+            if "429" in str(e):
+                time.sleep(60)
+                return self._call_gemini(prompt)
+            return f"Summary generation failed: {e}"
+
+    def _call_ollama(self, prompt: str) -> str:
         """Call Ollama LLM."""
         payload = {
-            "model": self.model,
+            "model": self.ollama_model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
             "options": {"temperature": 0.3}

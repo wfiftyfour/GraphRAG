@@ -1,4 +1,4 @@
-Create a comprehensive summary for this community of related entities.
+Create a comprehensive, informative summary for this community of interconnected health, demographic, and lifestyle entities.
 
 Entities in this community:
 {entities}
@@ -6,12 +6,26 @@ Entities in this community:
 Key relationships between them:
 {relationships}
 
-Write a summary that:
-1. Identifies the main theme or domain of this community
-2. Describes the most important entities and their significance
-3. Explains key relationships and how entities connect
-4. Highlights any notable patterns or insights
+SUMMARY REQUIREMENTS:
 
-The summary should be 2-3 paragraphs and help someone quickly understand what this community represents.
+**Structure (2-4 paragraphs):**
+
+1. **Theme & Domain**: Identify the PRIMARY theme (e.g., "Cardiovascular Health for Adult Males", "Hormonal Health & Testosterone", "Nutritional Requirements & Athletic Performance", "Cancer Screening Guidelines", "Lifestyle Risk Factors")
+
+2. **Core Entities & Significance**: Describe the MOST important entities (nutrients, conditions, demographics, measurements, screenings) and WHY they matter in this context
+
+3. **Relationship Network**: Explain HOW entities connect - requirements, risks, effects, recommendations, comparisons. Focus on actionable or medically significant connections
+
+4. **Patterns & Insights**: Highlight:
+   - Age-based progressions or thresholds
+   - Demographic-specific patterns
+   - Risk factors and preventive measures
+   - Lifestyle impacts
+   - Biological mechanisms
+   - Clinical implications
+
+**Tone**: Professional, informative, health-focused. Write as if explaining to someone researching this health topic.
+
+**Focus**: Prioritize medically relevant information, quantitative relationships, and actionable insights over general descriptions.
 
 Summary:

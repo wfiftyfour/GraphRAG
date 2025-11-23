@@ -23,13 +23,15 @@ def main():
             output_dir=f"{cfg['data']['processed_dir']}/embeddings"
         )
 
+        batch_size = cfg['embedding'].get('batch_size', 16)
+
         # 1. Embed chunks
         logger.info("Loading and embedding chunks...")
         chunks_path = Path(cfg['data']['processed_dir']) / 'chunks/chunks.json'
         with open(chunks_path) as f:
             chunks = json.load(f)
 
-        chunks = embedder.embed_chunks(chunks)
+        chunks = embedder.embed_chunks(chunks, batch_size=batch_size)
         embedder.save_embeddings(chunks, 'chunks')
         logger.info(f"Embedded {len(chunks)} chunks")
 
@@ -39,7 +41,7 @@ def main():
         with open(entities_path) as f:
             entities = json.load(f)
 
-        entities = embedder.embed_entities(entities)
+        entities = embedder.embed_entities(entities, batch_size=batch_size)
         embedder.save_embeddings(entities, 'entities')
         logger.info(f"Embedded {len(entities)} entities")
 
@@ -48,7 +50,7 @@ def main():
         summarizer = CommunitySummarizer()
         reports = summarizer.load()
 
-        reports = embedder.embed_communities(reports)
+        reports = embedder.embed_communities(reports, batch_size=batch_size)
         embedder.save_embeddings(reports, 'communities')
         logger.info(f"Embedded {len(reports)} community reports")
 

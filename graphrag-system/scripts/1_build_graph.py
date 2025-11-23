@@ -25,56 +25,80 @@ def main():
         documents = loader.load()
         logger.info(f"Loaded {len(documents)} documents")
 
-        # 2. Chunk documents
-        logger.info("Chunking documents...")
-        chunker = TextChunker(
-            chunk_size=cfg['chunking']['chunk_size'],
-            chunk_overlap=cfg['chunking']['chunk_overlap']
-        )
-        chunks = chunker.chunk_documents(documents)
-        logger.info(f"Created {len(chunks)} chunks")
-
-        # Save chunks
+        # 2. Load or chunk documents
         import json
         chunks_dir = Path(cfg['data']['processed_dir']) / 'chunks'
-        chunks_dir.mkdir(parents=True, exist_ok=True)
-        with open(chunks_dir / 'chunks.json', 'w') as f:
-            json.dump(chunks, f)
+        chunks_file = chunks_dir / 'chunks.json'
+
+        if chunks_file.exists():
+            logger.info("Loading existing chunks...")
+            with open(chunks_file) as f:
+                chunks = json.load(f)
+            logger.info(f"Loaded {len(chunks)} chunks from cache")
+        else:
+            logger.info("Chunking documents...")
+            chunker = TextChunker(
+                chunk_size=cfg['chunking']['chunk_size'],
+                chunk_overlap=cfg['chunking']['chunk_overlap']
+            )
+            chunks = chunker.chunk_documents(documents)
+            logger.info(f"Created {len(chunks)} chunks")
+
+            # Save chunks
+            chunks_dir.mkdir(parents=True, exist_ok=True)
+            with open(chunks_file, 'w') as f:
+                json.dump(chunks, f)
 
         # 3. Extract entities
-        logger.info("Extracting entities...")
-        entity_extractor = EntityExtractor()
-        entity_extractor.model = cfg['llm']['model']
-
-        # Load prompt template
-        with open('configs/prompts/entity_extraction.txt') as f:
-            entity_prompt = f.read()
-
-        entities = entity_extractor.extract_batch(chunks, entity_prompt)
-        logger.info(f"Extracted {len(entities)} entities")
-
-        # Save entities
         entities_dir = Path(cfg['data']['processed_dir']) / 'entities'
-        entities_dir.mkdir(parents=True, exist_ok=True)
-        with open(entities_dir / 'entities.json', 'w') as f:
-            json.dump(entities, f)
+        entities_file = entities_dir / 'entities.json'
+
+        if entities_file.exists():
+            logger.info("Loading existing entities...")
+            with open(entities_file) as f:
+                entities = json.load(f)
+            logger.info(f"Loaded {len(entities)} entities from cache")
+        else:
+            logger.info("Extracting entities...")
+            entity_extractor = EntityExtractor()
+            entity_extractor.model = cfg['llm']['model']
+
+            # Load prompt template
+            with open('configs/prompts/entity_extraction.txt') as f:
+                entity_prompt = f.read()
+
+            entities = entity_extractor.extract_batch(chunks, entity_prompt)
+            logger.info(f"Extracted {len(entities)} entities")
+
+            # Save entities
+            entities_dir.mkdir(parents=True, exist_ok=True)
+            with open(entities_file, 'w') as f:
+                json.dump(entities, f)
 
         # 4. Extract relationships
-        logger.info("Extracting relationships...")
-        rel_extractor = RelationshipExtractor()
-        rel_extractor.model = cfg['llm']['model']
-
-        with open('configs/prompts/relationship_extraction.txt') as f:
-            rel_prompt = f.read()
-
-        relationships = rel_extractor.extract_batch(chunks, entities, rel_prompt)
-        logger.info(f"Extracted {len(relationships)} relationships")
-
-        # Save relationships
         rels_dir = Path(cfg['data']['processed_dir']) / 'relationships'
-        rels_dir.mkdir(parents=True, exist_ok=True)
-        with open(rels_dir / 'relationships.json', 'w') as f:
-            json.dump(relationships, f)
+        rels_file = rels_dir / 'relationships.json'
+
+        if rels_file.exists():
+            logger.info("Loading existing relationships...")
+            with open(rels_file) as f:
+                relationships = json.load(f)
+            logger.info(f"Loaded {len(relationships)} relationships from cache")
+        else:
+            logger.info("Extracting relationships...")
+            rel_extractor = RelationshipExtractor()
+            rel_extractor.model = cfg['llm']['model']
+
+            with open('configs/prompts/relationship_extraction.txt') as f:
+                rel_prompt = f.read()
+
+            relationships = rel_extractor.extract_batch(chunks, entities, rel_prompt)
+            logger.info(f"Extracted {len(relationships)} relationships")
+
+            # Save relationships
+            rels_dir.mkdir(parents=True, exist_ok=True)
+            with open(rels_file, 'w') as f:
+                json.dump(relationships, f)
 
         # 5. Build graph
         logger.info("Building knowledge graph...")

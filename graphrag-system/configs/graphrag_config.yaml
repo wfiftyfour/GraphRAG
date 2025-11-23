@@ -1,52 +1,60 @@
-# GraphRAG Main Configuration
+# GraphRAG Main Configuration - Health & Nutrition Domain
 
 # Data paths
 data:
-  input_file: "data/input/graphrag_input.jsonl"
+  input_file: "data/input/graphrag_format.jsonl"
   output_dir: "data/output"
   processed_dir: "data/processed"
 
 # Chunking configuration
+# Optimized for Q&A conversations (avg 911 chars, median 451 chars)
 chunking:
-  chunk_size: 1200
-  chunk_overlap: 100
+  chunk_size: 800        # Smaller chunks for Q&A pairs (was 1200)
+  chunk_overlap: 150     # More overlap to preserve context (was 100)
+  # Most conversations are short, so smaller chunks work better
 
-# LLM configuration (Ollama)
+# LLM configuration (Ollama local - no rate limit)
 llm:
   provider: "ollama"
-  model: "llama3.1:8b"
+  model: "qwen2.5:3b"    # Lightweight 3B model for RTX 3050 8GB
   base_url: "http://localhost:11434"
-  temperature: 0.0  # For extraction tasks
-  max_tokens: 2048
+  temperature: 0.0
+  max_tokens: 3072
+  # No rate limit for local Ollama
 
 # Embedding configuration
+# Using BGE-large for health/nutrition semantic understanding
 embedding:
   model: "BAAI/bge-large-en-v1.5"
   dimension: 1024
-  batch_size: 32
+  batch_size: 16         # Reduce batch size for stability (was 32)
 
 # Graph configuration
 graph:
   output_dir: "data/output/graph"
 
 # Community detection
+# Health topics tend to cluster well
 community:
   algorithm: "leiden"
-  resolution: 1.0
+  resolution: 0.8        # Lower resolution for tighter clusters (was 1.0)
   output_dir: "data/output/communities"
+  # Health entities cluster by topic (nutrition, conditions, etc.)
 
 # Search configuration
+# Optimized for health Q&A retrieval
 search:
   local:
-    top_k: 10
+    top_k: 15            # More results for comprehensive health info (was 10)
     use_graph_context: true
   global:
-    top_k: 5
+    top_k: 8             # More communities for broad health topics (was 5)
   hybrid:
-    local_weight: 0.5
-    global_weight: 0.5
+    local_weight: 0.6    # Favor local search for specific health facts (was 0.5)
+    global_weight: 0.4
 
 # Generation configuration
+# Health answers need to be informative but concise
 generation:
-  temperature: 0.3
-  max_tokens: 1024
+  temperature: 0.4       # Slightly higher for natural health advice (was 0.3)
+  max_tokens: 1536       # Longer answers for health explanations (was 1024)

@@ -25,23 +25,43 @@ class GraphBuilder:
 
         # Add nodes (entities)
         for entity in entities:
-            self.graph.add_node(
-                entity['name'],
-                type=entity.get('type', 'UNKNOWN'),
-                description=entity.get('description', ''),
-                source_chunk=entity.get('source_chunk', '')
-            )
+            # Skip entities with invalid names
+            name = entity.get('name', '').strip()
+            if not name:
+                continue
+
+            # Convert all attributes to strings (GraphML doesn't support lists)
+            attrs = {}
+            for key, value in entity.items():
+                if key != 'name':
+                    if isinstance(value, list):
+                        attrs[key] = ', '.join(str(v) for v in value)
+                    else:
+                        attrs[key] = str(value) if value is not None else ''
+
+            self.graph.add_node(name, **attrs)
 
         # Add edges (relationships)
         for rel in relationships:
-            self.graph.add_edge(
-                rel['source'],
-                rel['target'],
-                relationship=rel.get('relationship', ''),
-                description=rel.get('description', ''),
-                weight=rel.get('weight', 1.0),
-                source_chunk=rel.get('source_chunk', '')
-            )
+            # Skip relationships with invalid source/target
+            source = rel.get('source', '').strip()
+            target = rel.get('target', '').strip()
+
+            if not source or not target:
+                continue
+
+            # Only add edge if both nodes exist
+            if self.graph.has_node(source) and self.graph.has_node(target):
+                # Convert all attributes to strings (GraphML doesn't support lists)
+                attrs = {}
+                for key, value in rel.items():
+                    if key not in ['source', 'target']:
+                        if isinstance(value, list):
+                            attrs[key] = ', '.join(str(v) for v in value)
+                        else:
+                            attrs[key] = str(value) if value is not None else ''
+
+                self.graph.add_edge(source, target, **attrs)
 
         return self
 
@@ -102,10 +122,13 @@ class GraphBuilder:
 
         import networkx as nx
 
+        num_nodes = self.graph.number_of_nodes()
+        avg_degree = sum(dict(self.graph.degree()).values()) / num_nodes if num_nodes > 0 else 0
+
         return {
-            'num_nodes': self.graph.number_of_nodes(),
+            'num_nodes': num_nodes,
             'num_edges': self.graph.number_of_edges(),
             'density': nx.density(self.graph),
-            'num_components': nx.number_connected_components(self.graph),
-            'avg_degree': sum(dict(self.graph.degree()).values()) / self.graph.number_of_nodes()
+            'num_components': nx.number_connected_components(self.graph) if num_nodes > 0 else 0,
+            'avg_degree': avg_degree
         }

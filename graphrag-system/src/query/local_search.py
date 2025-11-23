@@ -16,30 +16,43 @@ class LocalSearch:
         self.entity_metadata = None
         self.graph = None
 
-    def load(self):
-        """Load all necessary data."""
+    def load(self, load_entities: bool = False, load_graph: bool = False):
+        """Load all necessary data.
+
+        Args:
+            load_entities: Whether to load entity embeddings (slower, 34MB)
+            load_graph: Whether to load graph structure (slower, 2.4MB)
+        """
+        import json
         embeddings_dir = self.data_dir / "processed/embeddings"
 
-        # Load chunk embeddings
+        # Load chunk embeddings (15MB - required)
+        print("Loading chunk embeddings...")
         self.chunk_embeddings = np.load(embeddings_dir / "chunks_embeddings.npy")
-        import json
         with open(embeddings_dir / "chunks_metadata.json") as f:
             self.chunk_metadata = json.load(f)
+        print(f"✓ Loaded {len(self.chunk_metadata)} chunks")
 
-        # Load entity embeddings
-        entity_emb_path = embeddings_dir / "entities_embeddings.npy"
-        if entity_emb_path.exists():
-            self.entity_embeddings = np.load(entity_emb_path)
-            with open(embeddings_dir / "entities_metadata.json") as f:
-                self.entity_metadata = json.load(f)
+        # Load entity embeddings (34MB - optional, slower)
+        if load_entities:
+            entity_emb_path = embeddings_dir / "entities_embeddings.npy"
+            if entity_emb_path.exists():
+                print("Loading entity embeddings...")
+                self.entity_embeddings = np.load(entity_emb_path)
+                with open(embeddings_dir / "entities_metadata.json") as f:
+                    self.entity_metadata = json.load(f)
+                print(f"✓ Loaded {len(self.entity_metadata)} entities")
 
-        # Load graph
-        graph_path = self.data_dir / "output/graph/graph.graphml"
-        if graph_path.exists():
-            import networkx as nx
-            self.graph = nx.read_graphml(graph_path)
+        # Load graph (2.4MB - optional, slower)
+        if load_graph:
+            graph_path = self.data_dir / "output/graph/graph.graphml"
+            if graph_path.exists():
+                print("Loading graph structure...")
+                import networkx as nx
+                self.graph = nx.read_graphml(graph_path)
+                print(f"✓ Loaded graph with {self.graph.number_of_nodes()} nodes")
 
-    def search(self, query_embedding: np.ndarray, top_k: int = 10) -> List[Dict[str, Any]]:
+    def search(self, query_embedding: np.ndarray, top_k: int = 10, include_entities: bool = False) -> List[Dict[str, Any]]:
         """Search for relevant chunks and entities."""
         results = []
 
@@ -55,8 +68,8 @@ class LocalSearch:
                 'metadata': self.chunk_metadata[idx]
             })
 
-        # 2. Vector search on entities (if available)
-        if self.entity_embeddings is not None:
+        # 2. Vector search on entities (if available and requested)
+        if include_entities and self.entity_embeddings is not None:
             entity_scores = self._cosine_similarity(query_embedding, self.entity_embeddings)
             top_entity_indices = np.argsort(entity_scores)[-5:][::-1]
 

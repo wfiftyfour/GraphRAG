@@ -1,0 +1,14 @@
+[
+  {
+    "query": "What are the main topics discussed in the documents?",
+    "ground_truth": null
+  },
+  {
+    "query": "Who are the key people mentioned?",
+    "ground_truth": null
+  },
+  {
+    "query": "What are the relationships between different entities?",
+    "ground_truth": null
+  }
+]
