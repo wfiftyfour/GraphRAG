@@ -44,14 +44,27 @@ class GlobalSearch:
         results = []
         for idx in top_indices:
             report = self.community_reports[idx]
+
+            # Extract entity names from title (format: "entity1, entity2, and X others")
+            title = report.get('title', '')
+            entities = []
+            if title:
+                # Split by comma and "and", take first few entities
+                parts = title.replace(' and ', ', ').split(', ')
+                entities = [e.strip() for e in parts if not e.strip().endswith('others')]
+
             results.append({
                 'type': 'community',
                 'score': float(scores[idx]),
                 'community_id': report.get('community_id', idx),
-                'title': report.get('title', ''),
+                'title': title,
                 'summary': report.get('summary', ''),
                 'num_entities': report.get('num_entities', 0),
-                'rank': report.get('rank', 0)
+                'rank': report.get('rank', 0),
+                'metadata': {
+                    'entities': entities,
+                    'name': entities[0] if entities else None
+                }
             })
 
         return results
